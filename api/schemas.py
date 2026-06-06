@@ -1,3 +1,5 @@
+# schemas for request and response
+
 from pydantic import BaseModel
 
 class PromptRequest(BaseModel):
