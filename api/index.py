@@ -1,6 +1,18 @@
-import os
-from dotenv import load_dotenv
+from fastapi import FastAPI
+from api.schemas import PromptRequest, PromptResponse, StatsResponse
 
-load_dotenv()
-api_key = os.getenv("LLMOD_API_KEY")
-print(api_key)
+app = FastAPI()
+
+@app.get("/ping")
+def ping():
+    return "pong"
+
+@app.post("/api/prompt",response_model=PromptResponse)
+def prompt(request: PromptRequest):
+    response = PromptResponse(response="your wife is right!")
+    return response
+
+@app.get("/api/stats", response_model=StatsResponse)
+def stats():
+    response = StatsResponse(chunk_size = 512, overlap_ratio=0.3, top_k=14)
+    return response
