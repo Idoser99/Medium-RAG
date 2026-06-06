@@ -1,0 +1,12 @@
+# Web Framework for Server Endpoints
+fastapi
+uvicorn
+
+# AI and Vector Database Libraries
+langchain
+langchain-openai
+pinecone
+
+# Data Utilities
+pandas
+python-dotenv
