@@ -5,6 +5,8 @@ uvicorn
 # AI and Vector Database Libraries
 langchain
 langchain-openai
+langchain_pinecone
+langchain_text_splitters
 pinecone
 
 # Data Utilities

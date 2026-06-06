@@ -12,10 +12,15 @@ context. If the answer cannot be determined from the provided context,
 respond: “I don’t know based on the provided Medium articles data.”
 Always explain your answer using the given context, quoting or
 paraphrasing the relevant article passage or metadata when helpful.
+
+---------------------
+RETRIEVED CONTEXT:
+{context}
+---------------------
 """
 
 # Build an active prompt template configuration
 prompt_template = ChatPromptTemplate.from_messages([
-    # ("system", SYSTEM_PROMPT),
+    ("system", SYSTEM_PROMPT),
     ("human", "{question}")
 ])
