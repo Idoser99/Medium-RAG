@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from api.schemas import PromptRequest, PromptResponse, StatsResponse
+from api.schemas import PromptRequest, PromptResponse, StatsResponse, AugmentedPrompt, DocumentResponse
 from api.engine import prompt_template, create_context
 from pinecone import Pinecone
 from scripts.embedder import Embedder
@@ -39,13 +39,35 @@ def prompt(request: PromptRequest):
     # retrieve top k chunks
     # augmented prompt
     prompt = request.question
-    docs = vectorstore.similarity_search(query=prompt, k=top_k)
+
+    docs_scores_tuple = vectorstore.similarity_search_with_score(query=prompt, k=top_k)
+    docs = [doc for doc, score in docs_scores_tuple]
     context_segments = create_context(docs)
     context = "\n\n---\n\n".join(context_segments) if context_segments else "No relevant context found."
     augmented_prompt = prompt_template.format_messages(context=context, question=prompt)
     llm_response = llm.invoke(augmented_prompt)
-    response = PromptResponse(response=llm_response.content)
-    return response
+
+    response = llm_response.content
+    context_response = []
+    for doc, score in docs_scores_tuple:
+        context_response.append(
+            DocumentResponse(
+                article_id=str(doc.metadata.get("paper_id", "Unknown")),
+                title=str(doc.metadata.get("title", "Unknown Title")),
+                chunk=doc.page_content,
+                score=float(score)
+            )
+        )
+    system_prompt = augmented_prompt[0].content
+    user_prompt = augmented_prompt[1].content
+    return PromptResponse(
+        response=response,
+        context=context_response,
+        Augmented_prompt=AugmentedPrompt(
+            System=system_prompt,
+            User=user_prompt
+        )
+    )
 
 
 @app.get("/api/stats", response_model=StatsResponse)
