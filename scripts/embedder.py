@@ -45,7 +45,7 @@ class Embedder:
         """
         documents: [Document] = []
         df = pd.read_csv(self.csv_path)
-        for paper_idx, row in df.head(100).iterrows():
+        for paper_idx, row in df.iterrows():
             text = row["text"]
             chunks = self.splitter.split_text(text)
             for chunk_idx, chunk in enumerate(chunks):
