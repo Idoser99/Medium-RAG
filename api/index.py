@@ -9,6 +9,7 @@ from pinecone import Pinecone
 from scripts.embedder import Embedder
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
+from langchain_core.documents import Document
 
 load_dotenv()  #loading .env file with configurations, base url, api key, remote paths etc.
 
@@ -26,6 +27,9 @@ vectorstore = PineconeVectorStore(
     namespace=index_namespace,
     text_key="text"
 )
+high_threshold = 0.7
+mid_threshold = 0.5
+low_threshold = 0.35
 
 
 @app.get("/ping")
@@ -35,12 +39,10 @@ def ping():
 
 @app.post("/api/prompt", response_model=PromptResponse)
 def prompt(request: PromptRequest):
-    # prompt embedding
-    # retrieve top k chunks
-    # augmented prompt
     prompt = request.question
 
     docs_scores_tuple = vectorstore.similarity_search_with_score(query=prompt, k=top_k)
+    docs_scores_tuple = threshold_docs(docs_scores_tuple)
     docs = [doc for doc, score in docs_scores_tuple]
     context_segments = create_context(docs)
     context = "\n\n---\n\n".join(context_segments) if context_segments else "No relevant context found."
@@ -68,6 +70,22 @@ def prompt(request: PromptRequest):
             User=user_prompt
         )
     )
+
+
+def threshold_docs(docs_scores_tuples: list[tuple[Document, float]]) -> list[tuple[Document, float]]:
+    # high_docs = [(doc, score) for doc, score in docs_scores_tuples if score >= high_threshold]
+    # if high_docs:
+    #     return high_docs
+    #
+    # mid_docs = [(doc, score) for doc, score in docs_scores_tuples if score >= mid_threshold]
+    # if mid_docs:
+    #     return mid_docs
+
+    low_docs = [(doc, score) for doc, score in docs_scores_tuples if score >= low_threshold]
+    if low_docs:
+        return low_docs
+
+    return []
 
 
 @app.get("/api/stats", response_model=StatsResponse)
