@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from api.schemas import PromptRequest, PromptResponse, StatsResponse, AugmentedPrompt, DocumentResponse
+from api.schemas import PromptRequest, PromptResponse, StatsResponse, AugmentedPrompt, DocumentResponse, RootResponse
 from api.engine import prompt_template, create_context
 from pinecone import Pinecone
 from scripts.embedder import Embedder
@@ -11,7 +11,7 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
 
-load_dotenv()  #loading .env file with configurations, base url, api key, remote paths etc.
+load_dotenv()  # loading .env file with configurations, base url, api key, remote paths etc.
 
 app = FastAPI()
 
@@ -30,6 +30,20 @@ vectorstore = PineconeVectorStore(
 high_threshold = 0.7
 mid_threshold = 0.5
 low_threshold = 0.35
+
+
+@app.get("/", response_model=RootResponse)
+def read_root():
+    return RootResponse(
+        status="healthy",
+        service="Medium Article RAG Assistant API",
+        version="1.0.0",
+        supported_endpoints=[
+            "GET /ping",
+            "POST /api/prompt",
+            "GET /api/stats"
+        ]
+    )
 
 
 @app.get("/ping")

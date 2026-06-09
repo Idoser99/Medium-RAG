@@ -1,7 +1,13 @@
 # schemas for request and response
 
 from pydantic import BaseModel
-from langchain_core.documents import Document
+
+
+class RootResponse(BaseModel):
+    status: str
+    service: str
+    version: str
+    supported_endpoints: list[str]
 
 
 class PromptRequest(BaseModel):
