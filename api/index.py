@@ -52,9 +52,14 @@ def prompt(request: PromptRequest):
     response = llm_response.content
     context_response = []
     for doc, score in docs_scores_tuple:
+        paper_id = doc.metadata.get("paper_id")
+        try:
+            paper_id = str(int(paper_id))
+        except ValueError:
+            paper_id = "Unknown"
         context_response.append(
             DocumentResponse(
-                article_id=str(doc.metadata.get("paper_id", "Unknown")),
+                article_id=paper_id,
                 title=str(doc.metadata.get("title", "Unknown Title")),
                 chunk=doc.page_content,
                 score=float(score)
