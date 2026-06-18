@@ -10,13 +10,13 @@ from langchain_core.documents import Document
 class Embedder:
     chunk_size = 500
     overlap_ratio = 0.3
-    embedding_model = "ZYRANGG-text-embedding-3-small"
+    embedding_model = "text-embedding-3-small"
 
     def __init__(self):
         load_dotenv()
         self.index_name = os.getenv("PINECONE_INDEX_NAME")
         self.index_namespace = os.getenv("PINECONE_INDEX_NAMESPACE")
-        self.embeddings = OpenAIEmbeddings(model=self.embedding_model)
+        self.embeddings = OpenAIEmbeddings(model=os.getenv("OPENAI_MODEL_PREFIX") + self.embedding_model)
         self.csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "medium-papers.csv")
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunk_size,

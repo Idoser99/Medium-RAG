@@ -15,7 +15,8 @@ load_dotenv()  # loading .env file with configurations, base url, api key, remot
 
 app = FastAPI()
 
-llm = ChatOpenAI(model="ZYRANGG-gpt-5-mini")
+model_name = os.getenv("OPENAI_MODEL_PREFIX") + "gpt-5-mini"
+llm = ChatOpenAI(model=model_name)
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 index_name = os.getenv("PINECONE_INDEX_NAME")
 index = pc.Index(name=index_name)
@@ -23,7 +24,7 @@ index_namespace = os.getenv("PINECONE_INDEX_NAMESPACE")
 top_k = 14
 vectorstore = PineconeVectorStore(
     index=index,
-    embedding=OpenAIEmbeddings(model=Embedder.embedding_model),
+    embedding=OpenAIEmbeddings(model=os.getenv("OPENAI_MODEL_PREFIX") + Embedder.embedding_model),
     namespace=index_namespace,
     text_key="text"
 )
